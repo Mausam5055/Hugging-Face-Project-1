@@ -140,24 +140,34 @@ Here is how the magic happens inside the code (`src/` folder):
 
 ### 2. Setup Guide
 
-> **💡 Pro Tip:** We use a **Virtual Environment (.venv)**. This is a "sandbox" that keeps your project dependencies separate from your computer, preventing conflicts.
+#### Why use a Virtual Environment (`.venv`)?
+
+Instead of installing libraries globally on your computer (which can break other projects), we create a simplified "sandbox" inside the project folder.
+
+- **✅ Isolation:** Dependencies (like specific versions of PyTorch) don't conflict with other apps.
+- **✅ Safety:** If things break, you can just delete the `.venv` folder and start over.
+- **✅ Cleanliness:** Keeps your global Python installation clean.
 
 ```powershell
 # 1. Clone or create directory
 mkdir Multilingual-Translator-Summariser
 cd Multilingual-Translator-Summariser
 
-# 2. Create Virtual Environment
+# 2. Create the sandbox (.venv)
 python -m venv .venv
 
-# 3. Activate Environment (Windows)
+# 3. Activate the sandbox (Critical Step!)
+# You must do this every time you open a new terminal.
+# You will know it's active if you see (.venv) at the start of your line.
 & .venv/Scripts/Activate.ps1
 
-# 4. Install Dependencies
+# 4. Install Dependencies into the sandbox
 pip install -r requirements.txt
 ```
 
 ### 3. Run the Application
+
+Always make sure your virtual environment is active (look for `(.venv)` in your terminal prompt) before running.
 
 ```powershell
 python app.py
@@ -170,7 +180,12 @@ python app.py
 
 ## 🧠 Managing AI Models
 
-Models are stored in your global cache, not in the project folder. This saves space if multiple projects use the same model.
+Models are downloaded and stored in your local Hugging Face cache.
+
+- **Location on Windows:** `C:\Users\<your-username>\.cache\huggingface\hub`
+- **Location on Linux/Mac:** `~/.cache/huggingface/hub`
+
+These models are shared across projects.
 
 | Model Name                         | Size    | Function                             |
 | :--------------------------------- | :------ | :----------------------------------- |
@@ -179,15 +194,21 @@ Models are stored in your global cache, not in the project folder. This saves sp
 
 ### 🗑️ Cleaning Up (Free up Space)
 
-To delete models after you are done:
+If you need to reclaim disk space, you can delete the models.
+
+**Option 1: Using the CLI (Safe & Recommended)**
+This interactive tool lets you select exactly what to delete.
 
 ```powershell
-# 1. Open Terminal in project folder
-# 2. Run the cleanup tool
-huggingface-cli scan-cache
-
-# 3. Follow instructions to select and delete models
+huggingface-cli delete-cache
 ```
+
+_Use arrow keys to select models and press Enter to delete._
+
+**Option 2: Manual Deletion (Fast)**
+
+1. Navigate to: `C:\Users\<your-username>\.cache\huggingface\hub`
+2. Delete the folders starting with `models--facebook--nllb...` or `models--facebook--bart...`.
 
 ---
 
