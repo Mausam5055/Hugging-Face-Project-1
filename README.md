@@ -244,4 +244,4 @@ This app is **Cloud-Ready** for Hugging Face Spaces.
 
 ---
 
-_Built with ❤️ using Open Source AI._
+_Built with ❤️ By Mausam Kar_
