@@ -1,0 +1,109 @@
+\chapter{Usage Manual}
+
+This chapter guides you through running the application and understanding the user interface.
+
+\section{Running the Application}
+With your environment active, run the following command in your terminal:
+\begin{lstlisting}[language=bash]
+python app.py
+\end{lstlisting}
+
+\subsection{Startup Logs}
+You should see output similar to the following. Note the model loading times:
+\begin{verbatim}
+Initializing AI Services...
+Loading Translation Model: facebook/nllb-200-distilled-600M...
+(This may take 10-20 seconds on first run to download 1.2GB)
+Loading Summarization Model: facebook/bart-large-cnn...
+(This may take 10-15 seconds to download 1.6GB)
+Services loaded successfully.
+Running on local URL:  http://127.0.0.1:7860
+\end{verbatim}
+
+Open your browser (Chrome/Edge/Firefox) and navigate to \url{http://127.0.0.1:7860}.
+
+\section{Interface Overview}
+The User Interface (UI) is built with Gradio and consists of three main sections:
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[font=\small]
+        % Window frame (Wider)
+        \node[draw, thick, rounded corners, minimum width=13cm, minimum height=8cm, fill=white] (window) {};
+        
+        % Header inside window
+        \node[below=0.5cm of window.north, font=\bfseries\Large] {Multilingual Translator \& Summariser};
+        
+        % Left Column: Input
+        \node[draw, fill=hfgrey, minimum width=5cm, minimum height=5cm, below right=3cm and 1cm of window.north west] (input) {};
+        \node[above=0.1cm of input, font=\bfseries] {Input Text};
+        \node[gray, text width=4cm, align=center] at (input.center) {Paste any language text here...};
+        
+        % Button
+        \node[draw, fill=hfblue, text=white, minimum width=3cm, rounded corners, below=0.3cm of input] {Process};
+
+        % Right Column: Outputs
+        % Output 1
+        \node[draw, fill=green!5, minimum width=5cm, minimum height=2cm, below left=3cm and 1cm of window.north east] (out1) {};
+        \node[above=0.1cm of out1, font=\bfseries] {English Translation};
+        \node[gray, text width=4cm, align=center] at (out1.center) {Translated text appears here...};
+
+        % Output 2
+        \node[draw, fill=blue!5, minimum width=5cm, minimum height=2cm, below=1cm of out1] (out2) {};
+        \node[above=0.1cm of out2, font=\bfseries] {Summary};
+        \node[gray, text width=4cm, align=center] at (out2.center) {Summary appears here...};
+    \end{tikzpicture}
+    \caption{UI Layout Mockup}
+\end{figure}
+
+\section{Step-by-Step Workflow}
+\begin{enumerate}
+    \item \textbf{Input Field:} Copy and paste any text into the large box on the left. The model handles over 200 languages (Spanish, Hindi, French, Japanese, etc.).
+    \item \textbf{Process Button:} Click the "Process" button. The button will show a loading spinner while the GPU processes the request.
+    \item \textbf{Outputs:}
+    \begin{itemize}
+        \item \textbf{Top Right (Translation):} The system first translates the input into English. This preserves the full detail of the original text.
+        \item \textbf{Bottom Right (Summary):} The system then reads the English translation and creates a 2-3 sentence abstractive summary.
+    \end{itemize}
+\end{enumerate}
+
+\section{Example Scenarios}
+
+\subsection{Scenario 1: News Article (Hindi)}
+\begin{itemize}
+    \item \textbf{Input:} "Bharat ek vishaal desh hai..." (A long paragraph about India's geography).
+    \item \textbf{Action:} User clicks Process.
+    \item \textbf{Translation:} "India is a vast country..."
+    \item \textbf{Summary:} "India is geographically diverse with ancient culture."
+\end{itemize}
+
+\subsection{Scenario 2: Tech Review (French)}
+\begin{itemize}
+    \item \textbf{Input:} "Ce nouvel ordinateur portable est incroyablement rapide mais la batterie..."
+    \item \textbf{Translation:} "This new laptop is incredibly fast but the battery..."
+    \item \textbf{Summary:} "The laptop has excellent performance but poor battery life."
+\end{itemize}
+
+\begin{warningbox}
+The first request might be slow (10-20 seconds) as the computer "warms up" the models (JIT Compilation). Subsequent requests will be much faster.
+\end{warningbox}
+
+\section{Advanced Customization}
+Want to change the models? You can modify `src/translation.py`:
+
+\subsection{Using a Smaller Model}
+If you are on an older laptop, switch to the 600M distilled version or even the 1.3B version if you have more RAM.
+\begin{lstlisting}[language=Python]
+# In src/translation.py
+self.model_name = "facebook/nllb-200-distilled-600M" # Fast
+# self.model_name = "facebook/nllb-200-3.3B"         # Very Slow, More Accurate
+\end{lstlisting}
+
+\subsection{Changing the Summary Style}
+You can make the summary bullet-pointed by editing `src/summarization.py`:
+\begin{lstlisting}[language=Python]
+# In src/summarization.py
+def summarize(self, text):
+    prompt = f"Summarize this in bullet points: {text}"
+    # ... rest of code
+\end{lstlisting}

@@ -1,0 +1,87 @@
+\chapter{Installation \& Setup}
+
+This guide assumes you are running on Windows, but the commands are similar for Mac/Linux. We will cover the installation of Python, the creation of a virtual environment, and the installation of the machine learning dependencies.
+
+\section{Prerequisites}
+Before diving in, ensure you have the following installed on your system:
+\begin{enumerate}
+    \item \textbf{Python 3.8+}: Hugging Face libraries require a modern Python version. Verification: \texttt{python --version}.
+    \item \textbf{Git}: Standard for version control, useful for cloning the repository.
+    \item \textbf{Internet Connection}: To download model weights. The models (\texttt{NLLB-200} and \texttt{BART-Large}) are approx 2-3 GB combined.
+    \item \textbf{Hardware:} A GPU (NVIDIA GTX 1650 or better) is recommended for fast inference. If you use a CPU, expect delays of 10-15 seconds per request.
+\end{enumerate}
+
+\section{Step-by-Step Installation}
+
+\subsection{1. Clone the Repository}
+Open your terminal (PowerShell or Command Prompt) and navigate to your workspace.
+\begin{lstlisting}[language=bash]
+# Clone the project code
+git clone https://github.com/your-repo/multilingual-translator.git
+
+# Enter the directory
+cd multilingual-translator
+\end{lstlisting}
+
+\subsection{2. Create a Virtual Environment}
+It is "best practice" to isolate dependencies so they don't conflict with other projects.
+\begin{lstlisting}[language=bash]
+# Create the environment named 'venv'
+python -m venv venv
+
+# Activate it (Windows)
+# Your prompt should change to start with (venv)
+venv\Scripts\activate
+
+# Activate it (Linux/Mac)
+source venv/bin/activate
+\end{lstlisting}
+
+\subsection{3. Install Dependencies}
+We rely on \texttt{torch}, \texttt{transformers}, and \texttt{gradio}.
+\begin{lstlisting}[language=bash]
+# Upgrade pip first to avoid errors
+pip install --upgrade pip
+
+# Install dependencies from the file
+pip install -r requirements.txt
+\end{lstlisting}
+
+\section{GPU Configuration (Optional but Recommended)}
+Standard \texttt{pip install torch} usually installs the CPU version. To enable GPU support:
+
+\begin{enumerate}
+    \item Check your CUDA version (open NVIDIA Control Panel or run \texttt{nvidia-smi}).
+    \item Go to \url{https://pytorch.org/get-started/locally/}.
+    \item Copy the command for your version. For example (CUDA 11.8):
+\end{enumerate}
+
+\begin{lstlisting}[language=bash]
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+\end{lstlisting}
+
+\section{Directory Structure Verification}
+After installation, your project folder should look like this:
+\begin{lstlisting}[language=bash]
+multilingual-translator/
+|-- venv/                # Virtual Environment (do not touch)
+|-- src/
+|   |-- __init__.py
+|   |-- translation.py   # Translation Logic
+|   |-- summarization.py # Summarization Logic
+|-- app.py               # Main Entry Point
+|-- requirements.txt     # Dependency List
+|-- README.md            # Quick Start Guide
+\end{lstlisting}
+
+\begin{warningbox}
+Do not commit the \texttt{venv/} folder to Git! It is specific to your machine and very large. Use a \texttt{.gitignore} file to exclude it.
+\end{warningbox}
+
+\section{Troubleshooting Common Issues}
+\begin{itemize}
+    \item \textbf{Error: "Module not found"}: Ensure you activated the virtual environment before running the app.
+    \item \textbf{Error: "Torch not compiled with CUDA enabled"}: You installed the CPU version of Torch. Uninstall it (\texttt{pip uninstall torch}) and reinstall the GPU version using the command above.
+    \item \textbf{Slow Performance}: If the translation takes >30 seconds, you are likely running on CPU. This is expected for large models like NLLB-200.
+    \item \textbf{Download Fails}: These models are hosted on Hugging Face Hub. If you have a firewall, you might need to use a proxy or check your internet connection.
+\end{itemize}

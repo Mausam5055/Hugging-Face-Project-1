@@ -1,0 +1,77 @@
+\chapter{Project Overview \& Architecture}
+
+\section{Introduction}
+In today's interconnected world, language barriers remain a significant challenge. The **Multilingual Translator \& Summariser** is an AI-powered application designed to bridge this gap. It allows users to input text in \textit{any} language, automatically translates it into English, and then provides a concise summary of the content.
+
+\section{Problem \& Solution}
+\begin{itemize}
+    \item \textbf{The Problem:} Information Overload. Valuable documents (news, research, user feedback) are often available only in local languages and are too long to digest quickly.
+    \item \textbf{The Solution:} A single-click pipeline.
+    \begin{enumerate}
+        \item \textbf{Translate:} Convert local language `X` to English using \texttt{NLLB-200}.
+        \item \textbf{Summarize:} Condense the English text using \texttt{BART-Large}.
+        \item \textbf{Present:} Display both outputs in a clean, reactive Web UI.
+    \end{enumerate}
+\end{itemize}
+
+\section{System Design}
+The system follows a modular architecture, separating the core AI logic from the user interface.
+
+\begin{figure}[H]
+    \centering
+    % Resize box ensures it fits exactly within the page margins
+    \resizebox{\textwidth}{!}{
+    \begin{tikzpicture}[
+        node distance=4cm,
+        auto,
+        block/.style={rectangle, draw=hfblue, thick, fill=white, text width=3.5cm, align=center, rounded corners, minimum height=1.5cm},
+        line/.style={draw, very thick, color=darkgrey, ->, >=stealth},
+        label/.style={midway, fill=white, font=\footnotesize, text=darkgrey}
+    ]
+        % Layout: User -> UI -> App (Horizontal)
+        \node [block, fill=green!10] (user) {User Input \\ (Any Language)};
+        \node [block, right of=user, node distance=5.5cm, fill=hfblue!10] (ui) {Browser Interface};
+        \node [block, right of=ui, node distance=5.5cm] (app) {App Controller \\ (\texttt{app.py})};
+        
+        % Services (Below App)
+        \node [block, below of=app, xshift=-3cm, node distance=4cm] (trans) {Translation \\ (\texttt{NLLB-200})};
+        \node [block, below of=app, xshift=3cm, node distance=4cm] (summ) {Summarization \\ (\texttt{BART-Large})};
+
+        % Connections
+        \draw [line] (user) -- (ui);
+        \draw [line] (ui) -- (app);
+        
+        % App to Services (Orthogonal Paths)
+        % App -> Trans
+        \draw [line] (app.south) -- ++(0,-0.5) -| node[label, pos=0.25] {1. Raw Text} (trans.north);
+        % Trans -> App
+        \draw [line] (trans.east) -- ++(0.5,0) |- node[label, pos=0.25] {2. English} (app.east);
+        
+        % App -> Summ
+        % We connect App East to Summ North (via path)
+        % Actually, let's go from App South (shifted) to Summ North
+        \draw [line] (app.south) ++(1,0) -- ++(0,-0.5) -| node[label, pos=0.25] {3. English} (summ.north);
+        
+        % Summ -> App
+        % Summ East to App East?
+        \draw [line] (summ.east) -- ++(0.5,0) |- node[label, pos=0.25] {4. Summary} (app.south);
+        
+    \end{tikzpicture}
+    }
+    \caption{Data Flow Architecture}
+\end{figure}
+
+\section{Model Decisions}
+\begin{description}
+    \item[Translation Model:] We selected `facebook/nllb-200-distilled-600M`.
+    \begin{itemize}
+        \item \textbf{Pros:} Supports 200+ languages, high accuracy, reasonable size (1.2GB).
+        \item \textbf{Why Distilled?} The full model is 54GB, which is impossible to run on consumer hardware. The distilled version offers 90\% of the performance at 2\% of the size.
+    \end{itemize}
+    
+    \item[Summarization Model:] We selected `facebook/bart-large-cnn`.
+    \begin{itemize}
+        \item \textbf{Pros:} State-of-the-art for abstractive summarization on news articles.
+        \item \textbf{Why CNN?} It was fine-tuned on the CNN/DailyMail dataset, making it excellent for understanding journalistic and factual content.
+    \end{itemize}
+\end{description}
